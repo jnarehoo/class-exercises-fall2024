@@ -73,10 +73,15 @@ docker run -dp 3000:3000 \
 ## 7. Multi-Container Apps
 If you have never worked with network applications, this section may be confusing. That said, try to answer this question as best you can:
 
-1. If you have two containers running that are sandboxed (i.e., one container can't reach into another container and see its internal state or code), how did you get your two containers to communicate with one another? In other words, how was the web application container able to communicate with the database container?
+1. If you have two containers running that are sandboxed (i.e., one container can't reach into another container and see its internal state or code), 
+how did you get your two containers to communicate with one another? In other words, how was the web application container able to communicate with 
+the database container?
+It looks like we are using a username and password as well as specifying the port (3000:3000).
 
 ## 8. Using Docker Compose
-1. What is the purpose of the `docker-compose.yml` file?
+1. What is the purpose of the `docker-compose.yml` file? 
+The docker-compose.yml file allows us to define actions we can do on the command line. This way instead of running multiple lines of code we can do one
+that will refrence the code in the yml file.  
 
 ## 9. Image Building Best Practices (Optional)
 Optional section. Only complete if you want to.
