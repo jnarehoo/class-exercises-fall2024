@@ -15,7 +15,7 @@ export default function App() {
     const [courseList, setCourseList] = useState([]);
     const [user, setUser] = useState(null);
     const [schedule, setSchedule] = useState(null);
-    const username = "svanwart";
+    // const username = "svanwart"; defining the username below
 
     async function filterCourses(options) {
         const data = await fetchCourses(options);
@@ -39,13 +39,24 @@ export default function App() {
     }
 
     useEffect(() => {
-        async function initializeData() {
+        //async function initializeData() {
+        //    const userData = await fetchUser(username);
+        //    setUser(userData);
+
+        async function initializeData() { // its not appearing to screen
+            const username = prompt("Enter your username:");
+            if (!username) {
+                console.error("No username entered.");
+                return;
+            }
+            
             const userData = await fetchUser(username);
             setUser(userData);
-
+    
             const scheduleData = await fetchSchedule(userData.username);
             setSchedule(scheduleData);
         }
+
         initializeData();
     }, []);
 

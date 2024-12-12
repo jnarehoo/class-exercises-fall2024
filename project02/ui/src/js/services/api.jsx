@@ -2,15 +2,17 @@ const rootURL = "http://localhost:8000";
 
 // React Task 1:
 export async function fetchUser(username) {
-    // replace this code with functionality that actually
+    const response = await fetch(`${rootURL}/api/users/${username}`);  // wasnt showing username but adding
+    return await response.json();                                      // {rootURL} fixed it 
+    // replace this code with functionality that actually               found that out from chatGPT
     // queries that correct endpoint:
-    return {
-        id: 18,
-        username: "svanwart",
-        email: "svanwart@unca.edu",
-        first_name: "Sarah",
-        last_name: "Van Wart",
-    };
+    //return {
+    //    id: 18,
+    //    username: "svanwart",
+    //    email: "svanwart@unca.edu",
+    //    first_name: "Sarah",
+    //    last_name: "Van Wart",
+    //};
 }
 
 // React Task 3:
