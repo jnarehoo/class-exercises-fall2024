@@ -4,7 +4,7 @@ from sqlalchemy import select  # , or_
 from sqlalchemy.orm import joinedload, selectinload
 
 from db import AsyncSessionLocal
-from models import Course, Schedule
+from models import Course, Schedule, User # Importing user for my function
 
 """
 Documentation:
@@ -93,6 +93,42 @@ async def print_schedules(db: AsyncSessionLocal):
                 print("     * Location:", course.location.full_location)
             print()
 
+## MY FUNCTIONS FOR SQLALCHEMY
+async def print_usernames(db: AsyncSessionLocal):
+    # Query all of the users:
+    query = select(User).order_by(User.id)
+    # users = session.execute(query)
+    result = await db.execute(query)
+    users = result.scalars().all() # gets the user info
+    # print(query)  # prints the SQL
+    for user in users:
+        print(user.username)
+
+async def print_unique_departments(db: AsyncSessionLocal):
+    # Query the Courses
+    query = select(Course.department).distinct().order_by(Course.department.asc())
+
+    result = await db.execute(query)
+    departments = result.scalars().all() # get the department info
+
+    for department in departments: # iterate through and print the department code
+        print(department)
+    
+async def print_open_cs_courses(db: AsyncSessionLocal):
+    # choose the courses that are in the CSCI department and are open 
+    query = select(Course).where(
+        Course.department == 'CSCI',
+        Course.open == True
+    )
+
+    result = await db.execute(query)
+    # get info for our courses
+    courses = result.scalars().all()
+
+    for course in courses: 
+        print()
+        print("-" * 70) # prints a line to seperate the courses more 
+        print(f"* {course.title} ({course.crn})") # prints their name and their crn to the right in parentheses
 
 async def main():
     # create a DB session
@@ -102,6 +138,10 @@ async def main():
     await show_courses(db)
     await show_courses_with_table_joins(db)
     await print_schedules(db)
+    # it seems like they all work as expected
+    await print_usernames(db) 
+    await print_unique_departments(db)
+    await print_open_cs_courses(db)
 
     await db.close()
 

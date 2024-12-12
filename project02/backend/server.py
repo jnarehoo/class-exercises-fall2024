@@ -7,7 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload, selectinload
 
+from pydantic import BaseModel  
+
 import models
+from models import User
 import serializers
 from db import Base, engine, get_db
 
@@ -32,30 +35,53 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
 
-# Task 1
+# Task 1 --- working
 @app.get("/api/departments/", response_model=List[str])
 async def get_department_codes(db: AsyncSession = Depends(get_db)):
-    # replace with your code...
-    return []
+    query = select(models.Course.department).distinct().order_by(models.Course.department.asc())
+    result = await db.execute(query)
+    departments = result.scalars().all()
+    return departments
 
+# It didn't like that User was a SQLAlchemy object so I used chatGPT to figure out how to make it the 
+# correct type
+class UserResponse(BaseModel):  
+   id: int  
+   username: str  
+   email: str  
+   first_name: str  
+   last_name: str  
+  
+   class Config:  
+      orm_mode = True
 
-# Task 2
+# Task 2 --- working finally!
 # Note: replace response_model=object with response_model=User once you've got this working
-@app.get("/api/users/{username}", response_model=object)
+@app.get("/api/users/{username}", response_model=UserResponse)
 async def get_users_by_username(
     username: str, db: AsyncSession = Depends(get_db)
 ):
-    # replace with your code...
-    return {}
+    query = select(User).where(User.username == username)
+    result = await db.execute(query)
+    user = result.scalars().first()
 
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
-# Task 3
+    return user
+
+# Task 3 -- working!
 @app.get("/api/courses/", response_model=List[serializers.Course])
 async def get_courses(
     title: str = Query(None),
     instructor: str = Query(None),
     department: str = Query(None),
     hours: int = Query(None),
+    diversity_intensive: bool = Query(None),
+    diversity_intensive_r: bool = Query(None),
+    honors: bool = Query(None),
+    open: bool = Query(None),
+    days: str = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
 
@@ -86,6 +112,24 @@ async def get_courses(
                 models.Instructor.first_name.ilike(f"%{instructor}%"),
             )
         )
+    
+    ## Begining of my code 
+    if diversity_intensive: # only runs if its true
+        query = query.where(models.Course.diversity_intensive == True)
+
+    if diversity_intensive_r: # only does if its true 
+        query = query.where(models.Course.diversity_intensive_r == True)
+
+    
+    if honors: # only goes if its true
+        query = query.where(models.Course.honors == True)
+
+    if open: # only if its true
+        query = query.where(models.Course.open == True)
+
+    if days: # only shows exact matches to avoid showing people classes that would not work for their schedules
+        query = query.where(models.Course.days == days)
+
 
     result = await db.execute(
         query.order_by(models.Course.department, models.Course.code)
